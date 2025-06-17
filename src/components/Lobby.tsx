@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import AdminDashboard from './AdminDashboard';
 
 interface LobbyProps {
-  user: { id: number; email: string };
+  user: { id: number; email: string; role: number };
   onGameSelected: (game: any) => void;
 }
 
-const Lobby: React.FC<LobbyProps> = ({ user, onGameSelected }) => {
+const Lobby: React.FC<LobbyProps & { onLogout?: () => void }> = ({ user, onGameSelected, onLogout }) => {
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState('');
   const [games, setGames] = useState<any[]>([]);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   useEffect(() => {
     const fetchGames = () => {
@@ -30,7 +32,6 @@ const Lobby: React.FC<LobbyProps> = ({ user, onGameSelected }) => {
       body: JSON.stringify({ player1_id: user.id }),
     });
     const data = await res.json();
-    // Le créateur est toujours joueur 1
     onGameSelected({ id: data.gameId, role: 'player1' });
   };
 
@@ -42,14 +43,28 @@ const Lobby: React.FC<LobbyProps> = ({ user, onGameSelected }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ player2_id: user.id }),
     });
-    // Le premier à rejoindre est toujours joueur 2
     onGameSelected({ id: gameId, role: 'player2' });
     setJoining(false);
   };
 
+  // Fonction de déconnexion
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    if (onLogout) onLogout();
+    window.location.reload(); // Force le retour à la page de connexion
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-full">
-      <h2 className="text-2xl font-bold mb-6">Bienvenue, {user.email} !</h2>
+      <div className="flex w-full justify-between items-center mb-6 max-w-md">
+        <h2 className="text-2xl font-bold">Bienvenue, {user.email} !</h2>
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded ml-4"
+        >
+          Déconnexion
+        </button>
+      </div>
       <div className="flex gap-4 mb-4">
         <button
           onClick={createGame}
@@ -66,7 +81,6 @@ const Lobby: React.FC<LobbyProps> = ({ user, onGameSelected }) => {
               <span>
                 Partie #{game.id} | Joueur 1: {game.player1_id} | Joueur 2: {game.player2_id ? game.player2_id : 'En attente'}
               </span>
-              {/* Si la partie attend un joueur 2 et que ce n'est pas le créateur */}
               {!game.player2_id && game.player1_id !== user.id && (
                 <button
                   onClick={() => joinGame(game.id)}
@@ -76,7 +90,6 @@ const Lobby: React.FC<LobbyProps> = ({ user, onGameSelected }) => {
                   {joining ? '...' : 'Rejoindre'}
                 </button>
               )}
-              {/* Si l'utilisateur est dans la partie, il peut la reprendre */}
               {(game.player1_id === user.id || game.player2_id === user.id) && (
                 <button
                   onClick={() => onGameSelected({
@@ -93,6 +106,17 @@ const Lobby: React.FC<LobbyProps> = ({ user, onGameSelected }) => {
         </ul>
       </div>
       {error && <div className="text-red-600">{error}</div>}
+      {user.role === 1 ? (
+        <button
+          className="bg-indigo-600 text-white px-4 py-2 rounded mb-4"
+          onClick={() => setShowAdmin(true)}
+        >
+          Dashboard Admin
+        </button>
+      ) : (
+        <div className="mb-4 text-gray-700 font-semibold">Vous êtes un client</div>
+      )}
+      {showAdmin && <AdminDashboard onClose={() => setShowAdmin(false)} />}
     </div>
   );
 };

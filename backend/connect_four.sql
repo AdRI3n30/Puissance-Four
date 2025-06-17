@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `email` varchar(191) NOT NULL,
   `password` varchar(255) NOT NULL,
+  `role` tinyint(1) NOT NULL DEFAULT 0, -- 0 = user, 1 = admin
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -79,9 +80,9 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Déchargement des données de la table `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `password`) VALUES
-(3, 'adrien@gmail.com', '$2b$10$vu9yqdlkCRIARCZOlOwhL.IBD0XHcgej3qaoaFnczVZANwWWofxVu'),
-(6, 'adrien.boree@ynov.com', '$2b$10$v7ptyHvIkFckAICjpi/r.OBRX5xkIdBh8YklH2BRDf6D8uuDu2DFu');
+INSERT INTO `users` (`id`, `email`, `password`, `role`) VALUES
+(3, 'adrien@gmail.com', '$2b$10$vu9yqdlkCRIARCZOlOwhL.IBD0XHcgej3qaoaFnczVZANwWWofxVu', 0),
+(6, 'adrien.boree@ynov.com', '$2b$10$v7ptyHvIkFckAICjpi/r.OBRX5xkIdBh8YklH2BRDf6D8uuDu2DFu', 1);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

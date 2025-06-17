@@ -41,7 +41,7 @@ app.post('/api/signup', async (req, res) => {
     );
     // Récupère l'utilisateur créé
     const [rows] = await pool.query(
-      'SELECT id, email FROM users WHERE email = ?',
+      'SELECT id, email, role FROM users WHERE email = ?',
       [email]
     );
     res.status(201).json(rows[0]); // <-- retourne { id, email }
@@ -59,7 +59,7 @@ app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
     const [rows] = await pool.query(
-      'SELECT id, email, password FROM users WHERE email = ?',
+      'SELECT id, email, role, password FROM users WHERE email = ?',
       [email]
     );
     if (!rows.length) {
@@ -70,7 +70,7 @@ app.post('/api/login', async (req, res) => {
     if (!match) {
       return res.status(401).json({ error: 'Email ou mot de passe invalide' });
     }
-    res.json({ id: user.id, email: user.email }); // <-- retourne { id, email }
+    res.json({ id: user.id, email: user.email, role: user.role }); // <-- retourne { id, email }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -260,6 +260,26 @@ app.post('/api/games/:id/reset', async (req, res) => {
     [emptyBoard, gameId]
   );
   res.json({ message: 'Partie réinitialisée', board: JSON.parse(emptyBoard), current_player: 1, winner: null });
+});
+
+// Récupérer tous les utilisateurs
+app.get('/api/users', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT id, email, role FROM users');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Récupérer tous les messages
+app.get('/api/messages', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM messages ORDER BY timestamp DESC');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 const PORT = 3001;
