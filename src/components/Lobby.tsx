@@ -12,7 +12,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onGameSelected }) => {
 
   useEffect(() => {
     const fetchGames = () => {
-      fetch('http://localhost:3001/api/games')
+      fetch('/api/games')
         .then(res => res.json())
         .then(setGames);
     };
@@ -24,7 +24,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onGameSelected }) => {
 
   const createGame = async () => {
     setError('');
-    const res = await fetch('http://localhost:3001/api/games', {
+    const res = await fetch('/api/games', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ player1_id: user.id }),
@@ -37,7 +37,7 @@ const Lobby: React.FC<LobbyProps> = ({ user, onGameSelected }) => {
   const joinGame = async (gameId: number) => {
     setError('');
     setJoining(true);
-    await fetch(`http://localhost:3001/api/games/${gameId}/join`, {
+    await fetch(`/api/games/${gameId}/join`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ player2_id: user.id }),

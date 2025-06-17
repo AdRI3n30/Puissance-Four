@@ -22,7 +22,7 @@ const GameBoard = ({ gameId, role, playerId }: GameBoardProps) => {
 
   useEffect(() => {
     const fetchGame = () => {
-      fetch(`http://localhost:3001/api/games/${gameId}`)
+      fetch(`/api/games/${gameId}`)
         .then(res => res.json())
         .then(data => {
           setBoard(JSON.parse(data.board));
@@ -49,7 +49,7 @@ const GameBoard = ({ gameId, role, playerId }: GameBoardProps) => {
     ) {
       return;
     }
-    const res = await fetch(`http://localhost:3001/api/games/${gameId}/move`, {
+    const res = await fetch(`/api/games/${gameId}/move`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ player_id: playerId, column: colIndex }),
@@ -64,7 +64,7 @@ const GameBoard = ({ gameId, role, playerId }: GameBoardProps) => {
   };
 
   const resetGame = async () => {
-    const res = await fetch(`http://localhost:3001/api/games/${gameId}/reset`, {
+    const res = await fetch(`/api/games/${gameId}/reset`, {
       method: 'POST',
     });
     if (res.ok) {

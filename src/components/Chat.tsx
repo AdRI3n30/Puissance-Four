@@ -22,7 +22,7 @@ const Chat: React.FC<ChatProps> = ({ gameId, role }) => {
   const playerNumber = role === 'player1' ? 1 : 2;
 
   const fetchMessages = async () => {
-    const res = await fetch(`http://localhost:3001/api/games/${gameId}/messages`);
+    const res = await fetch(`/api/games/${gameId}/messages`);
     if (res.ok) {
       const data = await res.json();
       setMessages(data);
@@ -38,7 +38,7 @@ const Chat: React.FC<ChatProps> = ({ gameId, role }) => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentMessage.trim() === '') return;
-    await fetch(`http://localhost:3001/api/games/${gameId}/messages`, {
+    await fetch(`/api/games/${gameId}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ player: playerNumber, text: currentMessage }),

@@ -25,7 +25,7 @@ function App() {
           </h1>
           <button
             onClick={async () => {
-              await fetch(`http://localhost:3001/api/games/${game.id}/disconnect`, {
+              await fetch(`/api/games/${game.id}/disconnect`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ playerId: user.id }),

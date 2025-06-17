@@ -3,10 +3,22 @@ import cors from 'cors';
 import pool from './db.js';
 import bcrypt from 'bcrypt';
 import { checkWinner } from './gameLogic.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Sert les fichiers statiques du frontend
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// Pour toutes les routes non API, renvoyer index.html (SPA)
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
 
 // Test DB
 app.get('/api/test-db', async (req, res) => {

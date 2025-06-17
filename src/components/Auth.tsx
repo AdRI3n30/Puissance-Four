@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const createUser = async (email: string, password: string) => {
-  const res = await fetch('http://localhost:3001/api/signup', {
+  const res = await fetch('/api/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -11,7 +11,7 @@ const createUser = async (email: string, password: string) => {
 };
 
 const loginUser = async (email: string, password: string) => {
-  const res = await fetch('http://localhost:3001/api/login', {
+  const res = await fetch('/api/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
