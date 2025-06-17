@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
 
 const createUser = async (email: string, password: string) => {
+  console.log('Envoi de la requête de création de compte:', { email, password });
   const res = await fetch('/api/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
-  if (!res.ok) throw new Error('Erreur lors de la création du compte');
-  return await res.json();
+  console.log('Réponse brute:', res);
+  let data;
+  try {
+    data = await res.json();
+    console.log('Réponse JSON:', data);
+  } catch (e) {
+    console.error('Erreur lors du parsing JSON:', e);
+  }
+  if (!res.ok) {
+    throw new Error(data?.error || 'Erreur lors de la création du compte');
+  }
+  return data;
 };
 
 const loginUser = async (email: string, password: string) => {
