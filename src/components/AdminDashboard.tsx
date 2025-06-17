@@ -28,22 +28,43 @@ const AdminDashboard = ({ onClose }: { onClose: () => void }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchAll = async () => {
+    setLoading(true);
+    const [usersRes, gamesRes, messagesRes] = await Promise.all([
+      fetch('/api/users'),
+      fetch('/api/games'),
+      fetch('/api/messages'),
+    ]);
+    setUsers(await usersRes.json());
+    setGames(await gamesRes.json());
+    setMessages(await messagesRes.json());
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      // Appelle les bonnes routes API du backend
-      const [usersRes, gamesRes, messagesRes] = await Promise.all([
-        fetch('/api/users'),
-        fetch('/api/games'),
-        fetch('/api/messages'),
-      ]);
-      setUsers(await usersRes.json());
-      setGames(await gamesRes.json());
-      setMessages(await messagesRes.json());
-      setLoading(false);
-    };
     fetchAll();
   }, []);
+
+  // Suppression d'un utilisateur
+  const handleDeleteUser = async (id: number) => {
+    if (!window.confirm("Supprimer cet utilisateur ?")) return;
+    await fetch(`/api/users/${id}`, { method: 'DELETE' });
+    fetchAll();
+  };
+
+  // Suppression d'une partie
+  const handleDeleteGame = async (id: number) => {
+    if (!window.confirm("Supprimer cette partie ?")) return;
+    await fetch(`/api/games/${id}`, { method: 'DELETE' });
+    fetchAll();
+  };
+
+  // Suppression d'un message
+  const handleDeleteMessage = async (id: number) => {
+    if (!window.confirm("Supprimer ce message ?")) return;
+    await fetch(`/api/messages/${id}`, { method: 'DELETE' });
+    fetchAll();
+  };
 
   if (loading) return <div className="p-4">Chargement...</div>;
 
@@ -61,6 +82,7 @@ const AdminDashboard = ({ onClose }: { onClose: () => void }) => {
               <th>ID</th>
               <th>Email</th>
               <th>Rôle</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -69,6 +91,14 @@ const AdminDashboard = ({ onClose }: { onClose: () => void }) => {
                 <td>{u.id}</td>
                 <td>{u.email}</td>
                 <td>{u.role === 1 ? 'Admin' : 'User'}</td>
+                <td>
+                  <button
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                    onClick={() => handleDeleteUser(u.id)}
+                  >
+                    Supprimer
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -82,6 +112,7 @@ const AdminDashboard = ({ onClose }: { onClose: () => void }) => {
               <th>Joueur 2</th>
               <th>Gagnant</th>
               <th>Date</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -92,6 +123,14 @@ const AdminDashboard = ({ onClose }: { onClose: () => void }) => {
                 <td>{g.player2_id ?? '-'}</td>
                 <td>{g.winner ?? '-'}</td>
                 <td>{g.created_at ? new Date(g.created_at).toLocaleString() : '-'}</td>
+                <td>
+                  <button
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                    onClick={() => handleDeleteGame(g.id)}
+                  >
+                    Supprimer
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -105,6 +144,7 @@ const AdminDashboard = ({ onClose }: { onClose: () => void }) => {
               <th>Joueur</th>
               <th>Texte</th>
               <th>Date</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -115,6 +155,14 @@ const AdminDashboard = ({ onClose }: { onClose: () => void }) => {
                 <td>{m.player}</td>
                 <td>{m.text}</td>
                 <td>{m.timestamp ? new Date(m.timestamp).toLocaleString() : '-'}</td>
+                <td>
+                  <button
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                    onClick={() => handleDeleteMessage(m.id)}
+                  >
+                    Supprimer
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

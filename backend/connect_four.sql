@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `games` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `player1_connected` tinyint DEFAULT '0',
   `player2_connected` tinyint(1) DEFAULT '0',
+  `Finis` TINYINT(1) NOT NULL DEFAULT 0, -- <--- Correction ici
   PRIMARY KEY (`id`),
   KEY `player1_id` (`player1_id`),
   KEY `player2_id` (`player2_id`)
@@ -57,7 +58,10 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `text` text NOT NULL,
   `timestamp` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `game_id` (`game_id`)
+  KEY `game_id` (`game_id`),
+  KEY `player` (`player`),
+  CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`game_id`) REFERENCES `games` (`id`),
+  CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`player`) REFERENCES `users` (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------

@@ -33,6 +33,12 @@ app.get('/api/test-db', async (req, res) => {
 // Inscription
 app.post('/api/signup', async (req, res) => {
   const { email, password } = req.body;
+
+  // Vérification du domaine email
+  if (!/^[^@]+@gros\.local$/.test(email)) {
+    return res.status(400).json({ error: "Seules les adresses '@gros.local' sont autorisées." });
+  }
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
@@ -44,7 +50,7 @@ app.post('/api/signup', async (req, res) => {
       'SELECT id, email, role FROM users WHERE email = ?',
       [email]
     );
-    res.status(201).json(rows[0]); // <-- retourne { id, email }
+    res.status(201).json(rows[0]); // <-- retourne { id, email, role }
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
       res.status(400).json({ error: 'Email déjà utilisé' });
@@ -220,13 +226,13 @@ app.post('/api/games/:id/disconnect', async (req, res) => {
   const [updatedGames] = await pool.query('SELECT * FROM games WHERE id = ?', [gameId]);
   const updatedGame = updatedGames[0];
 
-  // Supprimer si les deux sont déco (0 ou false)
+  // Si les deux joueurs sont déconnectés, on ne supprime plus la partie ni les messages,
+  // mais on passe la colonne Finis à 1
   if (
     (updatedGame.player1_connected === 0 || updatedGame.player1_connected === false) &&
     (updatedGame.player2_connected === 0 || updatedGame.player2_connected === false)
   ) {
-    await pool.query('DELETE FROM messages WHERE game_id = ?', [gameId]);
-    await pool.query('DELETE FROM games WHERE id = ?', [gameId]);
+    await pool.query('UPDATE games SET Finis = 1 WHERE id = ?', [gameId]);
   }
 
   res.json({ message: 'Déconnexion prise en compte' });
@@ -277,6 +283,32 @@ app.get('/api/messages', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM messages ORDER BY timestamp DESC');
     res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Mettre fin à une partie (modifier la colonne 'finis')
+app.put('/api/games/:id/finis', async (req, res) => {
+  const { id } = req.params;
+  const { finis } = req.body; 
+  try {
+    await pool.query('UPDATE games SET Finis = ? WHERE id = ?', [finis, id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Supprimer une partie et ses messages associés
+app.delete('/api/games/:id', async (req, res) => {
+  const gameId = req.params.id;
+  try {
+    // Supprimer les messages liés à la partie
+    await pool.query('DELETE FROM messages WHERE game_id = ?', [gameId]);
+    // Supprimer la partie
+    await pool.query('DELETE FROM games WHERE id = ?', [gameId]);
+    res.json({ message: 'Partie et messages associés supprimés' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

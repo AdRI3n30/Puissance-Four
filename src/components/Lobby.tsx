@@ -76,33 +76,35 @@ const Lobby: React.FC<LobbyProps & { onLogout?: () => void }> = ({ user, onGameS
       <h3 className="text-xl font-semibold mb-2">Liste des parties :</h3>
       <div className="w-full max-w-md">
         <ul>
-          {games.map((game) => (
-            <li key={game.id} className="flex justify-between items-center border-b py-2">
-              <span>
-                Partie #{game.id} | Joueur 1: {game.player1_id} | Joueur 2: {game.player2_id ? game.player2_id : 'En attente'}
-              </span>
-              {!game.player2_id && game.player1_id !== user.id && (
-                <button
-                  onClick={() => joinGame(game.id)}
-                  disabled={joining}
-                  className="ml-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-                >
-                  {joining ? '...' : 'Rejoindre'}
-                </button>
-              )}
-              {(game.player1_id === user.id || game.player2_id === user.id) && (
-                <button
-                  onClick={() => onGameSelected({
-                    id: game.id,
-                    role: game.player1_id === user.id ? 'player1' : 'player2'
-                  })}
-                  className="ml-2 bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                >
-                  Reprendre
-                </button>
-              )}
-            </li>
-          ))}
+          {games
+            .filter(game => game.finis === 0) // Affiche seulement les parties non terminées
+            .map((game) => (
+              <li key={game.id} className="flex justify-between items-center border-b py-2">
+                <span>
+                  Partie #{game.id} | Joueur 1: {game.player1_id} | Joueur 2: {game.player2_id ? game.player2_id : 'En attente'}
+                </span>
+                {!game.player2_id && game.player1_id !== user.id && (
+                  <button
+                    onClick={() => joinGame(game.id)}
+                    disabled={joining}
+                    className="ml-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                  >
+                    {joining ? '...' : 'Rejoindre'}
+                  </button>
+                )}
+                {(game.player1_id === user.id || game.player2_id === user.id) && (
+                  <button
+                    onClick={() => onGameSelected({
+                      id: game.id,
+                      role: game.player1_id === user.id ? 'player1' : 'player2'
+                    })}
+                    className="ml-2 bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                  >
+                    Reprendre
+                  </button>
+                )}
+              </li>
+            ))}
         </ul>
       </div>
       {error && <div className="text-red-600">{error}</div>}
