@@ -35,8 +35,16 @@ app.post('/api/signup', async (req, res) => {
   const { email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    await pool.query('INSERT INTO users (email, password) VALUES (?, ?)', [email, hashedPassword]);
-    res.status(201).json({ message: 'Utilisateur créé' });
+    const [result] = await pool.query(
+      'INSERT INTO users (email, password) VALUES (?, ?)',
+      [email, hashedPassword]
+    );
+    // Récupère l'utilisateur créé
+    const [rows] = await pool.query(
+      'SELECT id, email FROM users WHERE email = ?',
+      [email]
+    );
+    res.status(201).json(rows[0]); // <-- retourne { id, email }
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
       res.status(400).json({ error: 'Email déjà utilisé' });
@@ -50,14 +58,19 @@ app.post('/api/signup', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (users.length === 0) return res.status(400).json({ error: 'Utilisateur inconnu' });
-
-    const user = users[0];
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(400).json({ error: 'Mot de passe incorrect' });
-
-    res.json({ id: user.id, email: user.email });
+    const [rows] = await pool.query(
+      'SELECT id, email, password FROM users WHERE email = ?',
+      [email]
+    );
+    if (!rows.length) {
+      return res.status(401).json({ error: 'Email ou mot de passe invalide' });
+    }
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(401).json({ error: 'Email ou mot de passe invalide' });
+    }
+    res.json({ id: user.id, email: user.email }); // <-- retourne { id, email }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

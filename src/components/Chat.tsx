@@ -35,6 +35,13 @@ const Chat: React.FC<ChatProps> = ({ gameId, role }) => {
     return () => clearInterval(interval);
   }, [gameId]);
 
+  // Ajoute cet effet pour scroller en bas à chaque nouveau message
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentMessage.trim() === '') return;

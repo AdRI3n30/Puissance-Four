@@ -1,12 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import GameBoard from './components/GameBoard';
 import Chat from './components/Chat';
 import Auth from './components/Auth';
 import Lobby from './components/Lobby';
 
 function App() {
-  const [user, setUser] = useState<{ id: number; email: string } | null>(null);
+  const [user, setUser] = useState<{ id: number; email: string } | null>(() => {
+    const saved = localStorage.getItem('user');
+    console.log('User from localStorage:', saved);
+    return saved ? JSON.parse(saved) : null;
+  });
   const [game, setGame] = useState<any>(null);
+
+  // Sauvegarde l'utilisateur dans le localStorage à chaque changement
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
   if (!user) {
     return <Auth onAuthSuccess={setUser} />;

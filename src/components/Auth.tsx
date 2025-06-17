@@ -50,12 +50,14 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
     try {
       if (isSignUp) {
         const user = await createUser(email, password);
+        console.log('Utilisateur connecté/inscrit:', user);
         onAuthSuccess(user);
       } else {
         const user = await loginUser(email, password);
         if (!user) {
           throw new Error('Invalid email or password');
         }
+        console.log('Utilisateur connecté/inscrit:', user);
         onAuthSuccess(user);
       }
     } catch (err) {
