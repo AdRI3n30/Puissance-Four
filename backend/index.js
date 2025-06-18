@@ -207,6 +207,17 @@ app.delete('/api/games/:id/messages', async (req, res) => {
   }
 });
 
+// Supprimer un message individuel
+app.delete('/api/messages/:id', async (req, res) => {
+  const messageId = req.params.id;
+  try {
+    await pool.query('DELETE FROM messages WHERE id = ?', [messageId]);
+    res.json({ message: 'Message supprimé' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Déconnexion
 app.post('/api/games/:id/disconnect', async (req, res) => {
   const { playerId } = req.body;
